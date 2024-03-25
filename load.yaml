@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-generator
+  labels:
+    app: load
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: load
+  template:
+    metadata:
+      labels:
+        app: load
+    spec:
+      containers:
+      - command:
+            - "/bin/sh"
+            - "-c"
+            - "while sleep 0.01; do wget -q -O- http://php-apache; done"
+        name: load
+        image: busybox
