@@ -6,10 +6,26 @@ import re
 from genderize import Genderize
 from openpyxl import load_workbook
 import json
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
+linkedin_email = os.getenv("USERNAME")
+linkedin_password = os.getenv("PASSWORD")
 
 df = pd.DataFrame(columns=["Full Name", "First Name", "Recipient", "Company"])
 
 def get_gender_from_name(name):
+    """
+    Determines the gender of a person based on their first name using the Genderize API.
+
+    Parameters:
+    - name (str): The first name of the person.
+
+    Returns:
+    - str: The gender of the person ('male', 'female', or 'other'). Defaults to 'female' if gender cannot be determined or in case of an error.
+    """
     try:
         gender = Genderize().get([name])[0]['gender']
         if gender == None:
@@ -19,14 +35,32 @@ def get_gender_from_name(name):
         return "female"
 
 def login():
+    """
+    Logs into LinkedIn using credentials provided via environment variables. It fills in the email and password fields and clicks the sign-in button.
+
+    Parameters:
+    - None
+
+    Returns:
+    - None
+    """
     email_field = page.wait_for_selector('//*[@id="session_key"]')
-    email_field.fill("")
+    email_field.fill(linkedin_email)
     password_field = page.wait_for_selector('//*[@id="session_password"]')
-    password_field.fill("")
+    password_field.fill(linkedin_password)
     sign_in = page.wait_for_selector('//*[@id="main-content"]/section[1]/div/div/form/div[2]/button')
     sign_in.click()
     
 def search(searchText):
+    """
+    Performs a search on LinkedIn using the provided search text. It navigates to the search bar, enters the search query, and presses Enter to initiate the search. After the search, it selects the 'People' filter to narrow down results to individuals.
+
+    Parameters:
+    - searchText (str): The text to be searched on LinkedIn.
+
+    Returns:
+    - None
+    """
     search_field = page.wait_for_selector('//*[@id="global-nav-typeahead"]/input')
     search_field.fill(searchText)
     page.keyboard.press('Enter')
@@ -37,6 +71,15 @@ def search(searchText):
     time.sleep(2)
 
 def filter_recruiters():
+    """
+    Applies filters to the LinkedIn search results to narrow down the list to recruiters based in the United States and currently working at the specified company.
+
+    Parameters:
+    - None
+
+    Returns:
+    - None
+    """
     location_field = page.wait_for_selector('//*[@id="searchFilter_geoUrn"]')
     location_field.click()
     us_location = page.wait_for_selector('.t-14:has-text("United States")')
@@ -54,6 +97,15 @@ def filter_recruiters():
     select_company.click()   
 
 def select_person(varsize):
+    """
+    Selects people from the search results up to a specified number and generates fake email addresses for them. Each person's name and generated email are added to a global dictionary and saved to an Excel file.
+
+    Parameters:
+    - varsize (int): The maximum number of people to select.
+
+    Returns:
+    - bool: False if the maximum number of people has been reached or if navigating to the next page is not possible, True otherwise.
+    """
     time.sleep(2)
     people = page.query_selector_all('.reusable-search__result-container .entity-result__title-text .app-aware-link :nth-child(1) :nth-child(1)')
     for p in people:
@@ -67,6 +119,15 @@ def select_person(varsize):
     return gotoNextPage()
 
 def gotoNextPage():
+    """
+    Attempts to navigate to the next page of search results on LinkedIn.
+
+    Parameters:
+    - None
+
+    Returns:
+    - bool: False if unable to navigate to the next page, True otherwise.
+    """
     time.sleep(1)
     page.keyboard.press('PageDown')
     page.keyboard.press('PageDown')
@@ -84,6 +145,16 @@ def gotoNextPage():
     return True
 
 def appendAndSaveToExcel(name, email):
+    """
+    Appends a new row with the person's name, first name, email, and company to the DataFrame and saves it to an Excel file.
+
+    Parameters:
+    - name (str): The full name of the person.
+    - email (str): The email address of the person.
+
+    Returns:
+    - None
+    """
     data = [[name, name.split()[0], email.lower(), company]]
     new_df = pd.DataFrame(data, columns=["Full Name", "First Name", "Recipient", "Company"])
     global df
@@ -91,6 +162,15 @@ def appendAndSaveToExcel(name, email):
     df.to_excel(excel_file_path)
 
 def generate_fake_email(full_name):
+    """
+    Generates a fake email address for a given full name based on predefined patterns associated with the company.
+
+    Parameters:
+    - full_name (str): The full name of the person.
+
+    Returns:
+    - str: The generated fake email address.
+    """
     names = full_name.split()
     first_name = names[0]
     first_name = re.sub('\W+','', first_name)
@@ -130,7 +210,7 @@ with sync_playwright() as p:
         data = f.read() 
     companyDict = json.loads(data) 
 
-    company = ""
+    company = "Zoox"
     
     searchText = company + " technical recruiter" #change
     
