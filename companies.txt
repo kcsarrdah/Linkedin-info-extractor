@@ -41,5 +41,20 @@
     "Paypal": [1, "@paypal.com"],
     "Nerdwallet": [1, "@nerdwallet.com"],
     "Lacework": [3, "@lacework.com"],
-    "Acushnet": [6,"@acushnetgolf.com"]
+    "Acushnet": [6,"@acushnetgolf.com"],
+    "Tesla": [1, '@tesla.com'],
+    "Google": [1, '@google.com'],
+    "Microsoft": [6, '@microsoft.com'],
+    "Wayfair": [6, '@wayfair.com'],
+    "Samsung": [5, '@samsung.com'],
+    "Oracle": [3, '@oracle.com'],
+    "Qualcomm": [3, '@qualcomm.com'],
+    "Dassault Systemes": [3, '@3ds.com'],
+    "Fidelity": [3, '@fidelity.com'],
+    "Ansys": [3, '@ansys.com'],
+    "Vantage": [4, '@vantage.sh'],
+    "Certik": [3, '@certik.io'],
+    "snowflake": [3, '@snowflake.com'],
+    "Adobe": [1, '@adobe.com']
 }
+
