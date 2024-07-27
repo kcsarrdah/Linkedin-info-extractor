@@ -1,60 +1,178 @@
-{   
-    "Apixio":[1, "@apixio.com"],
-    "Zoox" : [1, "@zoox.com"],
-    "Certik": [3, "@certik.com"],
-    "Credit karma" : [3, "@creditkarma.com"],
-    "Four kites" : [3, "@fourkites.com"],
-    "Volley" : [2, "@volleythat.com"],
-    "sofi" : [1, "@sofi.com"],
-    "Criteo" : [5, "@criteo.com"],
-    "Arcadis" : [3, "@arcadis.com"],
-    "Zions Bancorporation" : [3, "@zionsbancorp.com"],
-    "Intuit": [6, "@intuit.com"],
-    "Oshkosh" : [1, "@oshkoshcorp.com"],
-    "Varian Medical Systems" : [3, "@varian.com"],
-    "Samsara" : [3, "@samsara.com"],
-    "Wolverine" : [4, "@wolverinetech.com"],
-    "Capital One": [3, "@capitalone.com"],
-    "Ziprecruiter": [4, "@ziprecruiter.com"],
-    "KLA" : [3, "@kla.com"],
-    "Colgate-Palmolive" : [6, "@colpal.com"],
-    "Lockheed Martin": [3, "@lmco.com"],
-    "Siemens": [3, "@siemens.com"],
-    "HPE": [1, "@hpe.com"],
-    "Findhelp": [1, "@findhelp.com"],
-    "Bloomberg": [1, "@bloomberg.net"],
-    "Progress Residential": [1, "@progressresidential.com"],
-    "WellSky": [3, "@wellsky.com"],
-    "Pearson": [3, "@pearson.com"],
-    "T-mobile": [3, "@t-mobile.com"],
-    "Alexion": [3, "@alexion.com"],
-    "Atlassian": [1,"@atlassian.com"],
-    "Qorvo": [3, "@qorvo.com"],
-    "Fannie": [6, "@fanniemae.com"],
-    "First mode": [3, "@firstmode.com"],
-    "Voleon": [1, "@voleon.com"],
-    "Skydio": [3,"@skydio.com"],
-    "Fractal ai": [3,"@fractal.ai"],
-    "Datadog": [3,"@datadog.com"],
-    "Ally": [3,"@ally.com"],
-    "Quickbase": [1,"@quickbase.com"],
-    "Paypal": [1, "@paypal.com"],
-    "Nerdwallet": [1, "@nerdwallet.com"],
-    "Lacework": [3, "@lacework.com"],
-    "Acushnet": [6,"@acushnetgolf.com"],
-    "Tesla": [1, '@tesla.com'],
-    "Google": [1, '@google.com'],
-    "Microsoft": [6, '@microsoft.com'],
-    "Wayfair": [6, '@wayfair.com'],
-    "Samsung": [5, '@samsung.com'],
-    "Oracle": [3, '@oracle.com'],
-    "Qualcomm": [3, '@qualcomm.com'],
-    "Dassault Systemes": [3, '@3ds.com'],
-    "Fidelity": [3, '@fidelity.com'],
-    "Ansys": [3, '@ansys.com'],
-    "Vantage": [4, '@vantage.sh'],
-    "Certik": [3, '@certik.io'],
-    "snowflake": [3, '@snowflake.com'],
-    "Adobe": [1, '@adobe.com']
+{
+    "Apixio": [
+        1,
+        "@apixio.com"
+    ],
+    "Zoox": [
+        1,
+        "@zoox.com"
+    ],
+    "Certik": [
+        3,
+        "@certik.com"
+    ],
+    "Credit karma": [
+        3,
+        "@creditkarma.com"
+    ],
+    "Four kites": [
+        3,
+        "@fourkites.com"
+    ],
+    "Volley": [
+        2,
+        "@volleythat.com"
+    ],
+    "sofi": [
+        1,
+        "@sofi.com"
+    ],
+    "Criteo": [
+        5,
+        "@criteo.com"
+    ],
+    "Arcadis": [
+        3,
+        "@arcadis.com"
+    ],
+    "Zions Bancorporation": [
+        3,
+        "@zionsbancorp.com"
+    ],
+    "Intuit": [
+        6,
+        "@intuit.com"
+    ],
+    "Oshkosh": [
+        1,
+        "@oshkoshcorp.com"
+    ],
+    "Varian Medical Systems": [
+        3,
+        "@varian.com"
+    ],
+    "Samsara": [
+        3,
+        "@samsara.com"
+    ],
+    "Wolverine": [
+        4,
+        "@wolverinetech.com"
+    ],
+    "Capital One": [
+        3,
+        "@capitalone.com"
+    ],
+    "Ziprecruiter": [
+        4,
+        "@ziprecruiter.com"
+    ],
+    "KLA": [
+        3,
+        "@kla.com"
+    ],
+    "Colgate-Palmolive": [
+        6,
+        "@colpal.com"
+    ],
+    "Lockheed Martin": [
+        3,
+        "@lmco.com"
+    ],
+    "Siemens": [
+        3,
+        "@siemens.com"
+    ],
+    "HPE": [
+        1,
+        "@hpe.com"
+    ],
+    "Findhelp": [
+        1,
+        "@findhelp.com"
+    ],
+    "Bloomberg": [
+        1,
+        "@bloomberg.net"
+    ],
+    "Progress Residential": [
+        1,
+        "@progressresidential.com"
+    ],
+    "WellSky": [
+        3,
+        "@wellsky.com"
+    ],
+    "Pearson": [
+        3,
+        "@pearson.com"
+    ],
+    "T-mobile": [
+        3,
+        "@t-mobile.com"
+    ],
+    "Alexion": [
+        3,
+        "@alexion.com"
+    ],
+    "Atlassian": [
+        1,
+        "@atlassian.com"
+    ],
+    "Qorvo": [
+        3,
+        "@qorvo.com"
+    ],
+    "Fannie": [
+        6,
+        "@fanniemae.com"
+    ],
+    "First mode": [
+        3,
+        "@firstmode.com"
+    ],
+    "Voleon": [
+        1,
+        "@voleon.com"
+    ],
+    "Skydio": [
+        3,
+        "@skydio.com"
+    ],
+    "Fractal ai": [
+        3,
+        "@fractal.ai"
+    ],
+    "Datadog": [
+        3,
+        "@datadog.com"
+    ],
+    "Ally": [
+        3,
+        "@ally.com"
+    ],
+    "Quickbase": [
+        1,
+        "@quickbase.com"
+    ],
+    "Paypal": [
+        1,
+        "@paypal.com"
+    ],
+    "Nerdwallet": [
+        1,
+        "@nerdwallet.com"
+    ],
+    "Lacework": [
+        3,
+        "@lacework.com"
+    ],
+    "Acushnet": [
+        6,
+        "@acushnetgolf.com"
+    ],
+    "DoorDash" : [
+        3,
+        "@doordash.com"
+    ]
 }
-

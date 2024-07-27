@@ -8,12 +8,12 @@ from openpyxl import load_workbook
 import json
 import os
 from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
 
+linkedin_email = os.getenv("LINKEDIN_EMAIL")
+linkedin_password = os.getenv("LINKEDIN_PASSWORD")
 
-load_dotenv()
-linkedin_email = os.getenv("USERNAME")
-linkedin_password = os.getenv("PASSWORD")
-
+print(linkedin_email, linkedin_password)
 df = pd.DataFrame(columns=["Full Name", "First Name", "Recipient", "Company"])
 
 def get_gender_from_name(name):
@@ -33,17 +33,46 @@ def get_gender_from_name(name):
         return "female"
 
 def login():
-    """
-    Logs into LinkedIn using credentials provided via environment variables. It fills in the email and password fields and clicks the sign-in button.
-    Parameters:
-    - None
-    """
-    email_field = page.wait_for_selector('//*[@id="session_key"]')
-    email_field.fill(linkedin_email)
-    password_field = page.wait_for_selector('//*[@id="session_password"]')
-    password_field.fill(linkedin_password)
-    sign_in = page.wait_for_selector('//*[@id="main-content"]/section[1]/div/div/form/div[2]/button')
-    sign_in.click()
+    global page
+    try:
+        print("Attempting to log in...")
+
+        # Select "Sign in using email"
+        email_sign_in = page.wait_for_selector('text="Sign in with email"', timeout=10000)
+        email_sign_in.click()
+        print("Selected 'Sign in using email'")
+
+        # Wait for the next screen to load
+        time.sleep(2)
+
+        # Click on "Sign in" button on the home page
+        sign_in_button = page.wait_for_selector('text="Sign in"', timeout=10000)
+        sign_in_button.click()
+        print("Clicked 'Sign in' button")
+
+        # Wait for the email and password fields to be visible
+        email_field = page.wait_for_selector('input[name="session_key"]', timeout=10000)
+        print("Email field located")
+        password_field = page.wait_for_selector('input[name="session_password"]', timeout=10000)
+        print("Password field located")
+
+        # Fill in email and password
+        email_field.fill(linkedin_email)
+        print("Filled email")
+        password_field.fill(linkedin_password)
+        print("Filled password")
+
+        # Click the sign-in button
+        sign_in = page.wait_for_selector('button[type="submit"]', timeout=10000)
+        sign_in.click()
+        print("Login submitted")
+
+        # Add a wait to ensure login completes
+        page.wait_for_selector('#global-nav-typeahead', timeout=10000)
+        print("Login successful")
+    except Exception as e:
+        print(f"Login failed: {e}")
+
     
 def search(searchText):
     """
@@ -61,24 +90,63 @@ def search(searchText):
     time.sleep(2)
 
 def filter_recruiters():
-    """
-    Applies filters to the LinkedIn search results to narrow down the list to recruiters based in the United States and currently working at the specified company.
-    """
-    location_field = page.wait_for_selector('//*[@id="searchFilter_geoUrn"]')
-    location_field.click()
-    us_location = page.wait_for_selector('.t-14:has-text("United States")')
-    us_location.click()    
-    current_company_field = page.wait_for_selector('//*[@id="searchFilter_currentCompany"]')
-    current_company_field.click()
-    current_company_field = page.wait_for_selector('//*[@id="searchFilter_currentCompany"]')
-    current_company_field.click()
-    search_given_company = page.wait_for_selector('#hoverable-outlet-current-company-filter-value .search-basic-typeahead input')
-    search_given_company.fill(company)
-    time.sleep(2)
-    current_company = page.wait_for_selector('#hoverable-outlet-current-company-filter-value .display-flex .t-14')
-    current_company.click()
-    select_company = page.wait_for_selector('//*[@id="searchFilter_geoUrn"]')
-    select_company.click()   
+    global page
+    try:
+        print("Applying filters...")
+
+        # Wait for and click on the location filter
+        location_field = page.wait_for_selector('//*[@id="searchFilter_geoUrn"]', timeout=10000)
+        location_field.click()
+        print("Location field clicked")
+        time.sleep(2)  # Add delay to ensure the location options are loaded
+
+        # Wait for and select United States
+        us_location = page.wait_for_selector('.t-14:has-text("United States")', timeout=10000)
+        us_location.click()
+        print("United States location selected")
+        time.sleep(2)  # Ensure selection is processed
+
+        # Click on "Show results" to apply the location filter within the dropdown
+        location_dropdown = page.wait_for_selector('div.artdeco-hoverable-content--visible', timeout=10000)
+        show_results_button = location_dropdown.query_selector('button:has-text("Show results")')
+        show_results_button.click()
+        print("Show results button clicked for location filter")
+        page.wait_for_selector('div.search-results-container', timeout=10000)
+        print("Results updated for location filter")
+
+        time.sleep(5)  # Ensure results are updated before applying the next filter
+
+        # Wait for and click on the current company filter
+        current_company_field = page.wait_for_selector('//*[@id="searchFilter_currentCompany"]', timeout=10000)
+        current_company_field.click()
+        print("Current company filter clicked")
+        time.sleep(2)  # Add delay to ensure the company options are loaded
+
+        # Wait for and select the company
+        search_given_company = page.wait_for_selector('#hoverable-outlet-current-company-filter-value .search-basic-typeahead input', timeout=10000)
+        search_given_company.fill(company)
+        print(f"Filled company: {company}")
+        time.sleep(2)  # Ensure company suggestions are loaded
+
+        # Check if the company appears in the suggestions
+        current_company_suggestion = page.wait_for_selector('#hoverable-outlet-current-company-filter-value .basic-typeahead__selectable', timeout=10000)
+        current_company_suggestion.click()
+        print("Current company selected from suggestions")
+
+        # Click on "Show results" to apply the current company filter within the dropdown
+        company_dropdown = page.wait_for_selector('div.artdeco-hoverable-content--visible', timeout=10000)
+        show_results_button = company_dropdown.query_selector('button:has-text("Show results")')
+        show_results_button.click()
+        print("Show results button clicked for company filter")
+        page.wait_for_selector('div.search-results-container', timeout=10000)
+        print("Results updated for company filter")
+
+        time.sleep(5)  # Ensure results are updated before applying the next filter
+
+        print("Filters applied and dropdown closed")
+
+    except Exception as e:
+        print(f"Filter application failed: {e}")
 
 def select_person(varsize):
     """
@@ -145,9 +213,9 @@ def generate_fake_email(full_name):
     """
     names = full_name.split()
     first_name = names[0]
-    first_name = re.sub('\W+','', first_name)
+    first_name = re.sub(r'\W+', '', first_name)
     last_name = names[1]
-    last_name = re.sub('\W+','', last_name)
+    last_name = re.sub(r'\W+', '', last_name)
     first_initial = first_name[0].lower()
     last_name_parts = re.split(r'[,.\-s]+', last_name)
     last = " ".join(last_name_parts).lower()
@@ -182,8 +250,7 @@ with sync_playwright() as p:
         data = f.read() 
     companyDict = json.loads(data) 
 
-    company = "Zoox"
-    
+    company = "DoorDash" #change
     searchText = company + " technical recruiter" #change
     searchTextEngineeringManager = company + " engineering manager" #change
     searchtextUniversityRecruiter = company + " university recruiter" #change
