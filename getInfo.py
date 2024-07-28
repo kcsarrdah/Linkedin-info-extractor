@@ -254,6 +254,8 @@ with sync_playwright() as p:
     searchText = company + " technical recruiter" #change
     searchTextEngineeringManager = company + " engineering manager" #change
     searchtextUniversityRecruiter = company + " university recruiter" #change
+    searchtextTalentAcquisition = company + " talent acquisition" #change
+    searchtextEarlyCareerRecruiter = company + " early career recruiter" #change
     
     login()
     search(searchText)
