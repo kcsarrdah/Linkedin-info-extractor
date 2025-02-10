@@ -6,3 +6,7 @@ venv/
 
 # Ignore the recruiters folder
 Recruiters/
+
+#ignore data
+Data/
+
