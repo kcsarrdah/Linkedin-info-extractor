@@ -6,6 +6,7 @@ from src.excelhandler import save_recruiter_data, generate_emails
 import os
 import time
 import json
+import sys
 from playwright.sync_api import sync_playwright
 
 
@@ -88,13 +89,10 @@ def process_recruiters(html_path, pdf_path):
     return list(all_recruiters.values())
 
 
-def main():
-    # Load company data
-    company_dict = load_company_data()
-    if not company_dict:
-        return
+def scrape_recruiters(company):
+    """Scrape recruiter names for a given company"""
+    print(f"Starting scraping for {company}...")
 
-    company = "Glean"
     roles = [
         {"role": "technical recruiter", "search_text": f"{company} technical recruiter"},
         {"role": "university recruiter", "search_text": f"{company} university recruiter"}
@@ -152,9 +150,7 @@ def main():
 
         # Save all recruiters to company file
         if all_recruiters:
-            if save_recruiter_data(all_recruiters, company):
-                # Generate emails right after saving data
-                generate_emails(company)
+            save_recruiter_data(all_recruiters, company)
 
         browser.close()
 
@@ -165,6 +161,28 @@ def main():
         except:
             print("Note: Temp directory not empty or already removed")
 
+
+def print_usage():
+    print("""
+Usage:
+    python3 main.py scrape <company_name>     - Scrape recruiter names for the specified company
+    python3 main.py generate_mails <company_name>  - Generate emails for previously scraped recruiters
+    """)
+
+def main():
+    if len(sys.argv) != 3:
+        print_usage()
+        return
+
+    command = sys.argv[1]
+    company = sys.argv[2]
+
+    if command == "scrape":
+        scrape_recruiters(company)
+    elif command == "generate_mails":
+        generate_emails(company)
+    else:
+        print_usage()
 
 if __name__ == "__main__":
     main()

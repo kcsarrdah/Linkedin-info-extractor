@@ -174,5 +174,9 @@
     "DoorDash" : [
         3,
         "@doordash.com"
+    ],
+    "Glean" : [
+        3,
+        "@glean.com"
     ]
 }

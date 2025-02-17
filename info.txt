@@ -1,187 +1,13 @@
-Yes, the automation is working but the data collection part isn't working. Looking at your code, it's in the select_person function where the issue might be. Let's debug the selector:
-Current selector:
-pythonCopy'.reusable-search__result-container .entity-result__title-text .app-aware-link :nth-child(1) :nth-child(1)'
-Let's modify the select_person function to be more robust and add debugging:
-pythonCopydef select_person(page, varsize, role, company, company_dict, df, file_path):
-    try:
-        time.sleep(3)  # Give page time to load
-        print("Starting to select people...")
-
-        # Try different selectors (from most specific to least)
-        selectors = [
-            '.entity-result__title-text a.app-aware-link span span',  # Original structure
-            '.entity-result__title-text a.app-aware-link span',       # Simpler
-            '.entity-result__title-text a.app-aware-link',            # Even simpler
-            'h3.entity-result__title a'                               # Most basic
-        ]
-
-        people = None
-        used_selector = None
-
-        for selector in selectors:
-            people = page.query_selector_all(selector)
-            if people and len(people) > 0:
-                used_selector = selector
-                print(f"Found {len(people)} people using selector: {selector}")
-                break
-
-        if not people or len(people) == 0:
-            print("No people found in search results")
-            page.screenshot(path="no_results.png")
-            return False
-
-        for p in people:
-            if len(name_email_map) >= varsize:
-                return False
-
-            try:
-                name = p.text_content().strip()
-                if name and len(name.split()) >= 2:  # Ensure we have at least first and last name
-                    print(f"Found name: {name}")
-                    name_email_map[name] = generate_fake_email(name, company, company_dict)
-                    df = append_and_save_to_excel(df, name, name_email_map[name], company, role, file_path)
-                else:
-                    print(f"Skipping invalid name: '{name}'")
-            except Exception as e:
-                print(f"Error processing person: {str(e)}")
-                continue
-
-        print(f"Processed {len(name_email_map)} people so far")
-        return goto_next_page(page)
-
-    except Exception as e:
-        print(f"Error in select_person: {str(e)}")
-        page.screenshot(path="select_person_error.png")
-        return False
-Also, let's add a debug function to check the page structure:
-pythonCopydef debug_page_structure(page):
-    # Print all links with their text content
-    links = page.query_selector_all('a.app-aware-link')
-    print(f"\nFound {len(links)} links:")
-    for link in links:
-        print(f"Link text: {link.text_content().strip()}")
-
-    # Take a screenshot
-    page.screenshot(path="debug_page.png")
-Add this to your main.py right before the select_person call:
-pythonCopy        time.sleep(3)  # Give filters time to apply
-        debug_page_structure(page)  # Add this line
-        flag = select_person(page, varsize, role_name, company, company_dict, df, excel_file_path)
-Would you like to try these changes? They should help us understand exactly what's on the page and why the selectors might not be working. CopyRetryKSwhile we are at it, we also need to consider that the website might recognize us as a bot, how can we avoid that? we are loggin in alot, and also performing the same actions... any thoughts?EditYes, absolutely! Here are several strategies we can implement to make the automation more human-like and avoid bot detection:
-
 Add randomized delays and human-like behavior:
-
-pythonCopyimport random
-
-def human_delay():
-    time.sleep(random.uniform(2, 4))
-
-def human_typing(element, text):
-    for char in text:
-        element.type(char)
-        time.sleep(random.uniform(0.1, 0.3))
 
 Add random mouse movements and scrolling:
 
-pythonCopydef random_scroll(page):
-    page.mouse.wheel(0, random.randint(100, 300))
-    time.sleep(random.uniform(0.5, 1.5))
-
-def move_mouse_randomly(page):
-    page.mouse.move(
-        random.randint(0, 800),
-        random.randint(0, 600)
-    )
-
 Implement session management and rotation:
-
-pythonCopydef create_persistent_context(playwright):
-    user_data_dir = f"./browser_data/session_{random.randint(1,5)}"
-    return playwright.chromium.launch_persistent_context(
-        user_data_dir,
-        headless=False,
-        user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        viewport={'width': 1280, 'height': 720},
-        timezone_id='America/New_York',
-        locale='en-US'
-    )
 
 Add stealth mode configurations:
 
-pythonCopydef setup_stealth_context(context):
-    # Mask WebDriver
-    context.add_init_script("""
-        Object.defineProperty(navigator, 'webdriver', {
-            get: () => false
-        });
-    """)
-
-    # Add random fingerprint characteristics
-    context.add_init_script("""
-        const originalQuery = window.navigator.permissions.query;
-        window.navigator.permissions.query = (parameters) => (
-            parameters.name === 'notifications' ?
-                Promise.resolve({state: Notification.permission}) :
-                originalQuery(parameters)
-        );
-    """)
-
 Implement request throttling:
 
-pythonCopydef throttle_requests(route):
-    route.continue_(
-        throttle={
-            'downloadThroughput': 1024 * 1024 * 2,  # 2 Mb/s
-            'uploadThroughput': 1024 * 1024,        # 1 Mb/s
-            'latency': 100                          # 100ms
-        }
-    )
-Here's how to integrate these into your main script:
-pythonCopywith sync_playwright() as p:
-    context = create_persistent_context(p)
-    setup_stealth_context(context)
-    page = context.new_page()
-
-    # Route all requests through throttling
-    page.route("**/*", throttle_requests)
-
-    # Add random delays between actions
-    page.goto('https://linkedin.com/login')
-    human_delay()
-
-    login(page)
-    human_delay()
-
-    for role in roles:
-        try:
-            # Clear cookies occasionally
-            if random.random() < 0.3:
-                context.clear_cookies()
-
-            search_text = role["search_text"]
-            role_name = role["role"]
-
-            # Add random mouse movements
-            move_mouse_randomly(page)
-            search(page, search_text)
-            human_delay()
-
-            random_scroll(page)
-            filter_recruiters(page, company)
-
-            # Add random pauses between scraping
-            time.sleep(random.uniform(10, 20))
-
-            # Limit number of actions per session
-            if len(name_email_map) > 50:
-                context.close()
-                context = create_persistent_context(p)
-                page = context.new_page()
-                login(page)
-
-        except Exception as e:
-            print(f"Error processing role {role_name}: {str(e)}")
-            continue
 Additional recommendations:
 
 Rotate IP addresses (using proxies)
@@ -193,3 +19,14 @@ Implement rate limiting
 Handle CAPTCHAs if they appear
 
 Would you like me to elaborate on any of these aspects or show how to implement them in more detail?
+
+
+stuff to add :
+verify emails (options : True Mail(open soure Link : https://truemail-rb.org/#/about
+) or Captain verify(pretty cheap))
+generate email drafts for the companies,
+email schedule send integration,
+update the sending data on the excel sheet.
+
+
+taresh.sethi@glean.com
