@@ -1,6 +1,5 @@
 hashmap = {
     'amazon': None,
-    'amazon robotics': None,
     'Tesla': '[First Initial][Last Name]@[Domain]',
     'paypal': '[First Initial][Last Name]@[Domain]',
     'google': '[First Initial][Last Name]@[Domain]',

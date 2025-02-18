@@ -23,7 +23,7 @@ class GmailSender:
         # HTML template with proper styling
         self.template = """
         <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000;">
-            <p>Dear {Recruiter_Name},</p>
+            <p>Hey {Recruiter_Name},</p>
 
             <p>I am Krishnna from Boston. I recently graduated from Northeastern University with a master's degree in computer software engineering.</p>
 
@@ -85,6 +85,17 @@ class GmailSender:
         raw = base64.urlsafe_b64encode(message.as_bytes())
         return {'raw': raw.decode()}
 
+    def format_name(self, name: str) -> str:
+        """Ensure proper capitalization of name"""
+        # Handle empty or None names
+        if not name:
+            return ""
+
+        # Split name into parts and capitalize each part
+        name_parts = name.strip().split()
+        capitalized_parts = [part.capitalize() for part in name_parts]
+
+        return " ".join(capitalized_parts)
     def send_email(self, to_email="kcsarrdahspamacc@gmail.com",
                    recruiter_name="Test", company_name="TestCompany"):
         """Send email with resume attachment"""
@@ -94,9 +105,10 @@ class GmailSender:
                 print(f"Warning: Resume not found at {self.resume_path}")
                 return False
 
+            formatted_name = self.format_name(recruiter_name)
             # Create message body with replaced placeholders
             body = self.template.format(
-                Recruiter_Name=recruiter_name,
+                Recruiter_Name=formatted_name,
                 Company_Name=company_name
             )
 

@@ -1,4 +1,5 @@
-from src.config import LINKEDIN_EMAIL, LINKEDIN_PASSWORD
+#old file, can be used for complete automation, if you dont prefer full control.
+
 from src.linkedinAutomation import login, search, filter_recruiters, goto_next_page
 from src.html_parser import HTMLProcessor
 from src.pdf_parser import PDFProcessor

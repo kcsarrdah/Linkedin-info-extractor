@@ -20,13 +20,6 @@ Handle CAPTCHAs if they appear
 
 Would you like me to elaborate on any of these aspects or show how to implement them in more detail?
 
-
 stuff to add :
 verify emails (options : True Mail(open soure Link : https://truemail-rb.org/#/about
 ) or Captain verify(pretty cheap))
-generate email drafts for the companies,
-email schedule send integration,
-update the sending data on the excel sheet.
-
-
-taresh.sethi@glean.com

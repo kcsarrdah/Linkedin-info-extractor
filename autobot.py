@@ -1,8 +1,10 @@
-from src.config import LINKEDIN_EMAIL, LINKEDIN_PASSWORD
 from src.linkedinAutomation import login, search, filter_recruiters, goto_next_page
 from src.html_parser import HTMLProcessor
 from src.pdf_parser import PDFProcessor
 from src.excelhandler import save_recruiter_data, generate_emails
+from src.emailDraftManager import generate_company_drafts
+from src.emailSender import GmailSender
+import pandas as pd
 import os
 import time
 import json
@@ -169,20 +171,185 @@ Usage:
     python3 main.py generate_mails <company_name>  - Generate emails for previously scraped recruiters
     """)
 
+def generate_mails(company):
+    """Generate emails and drafts for company"""
+    # First generate email addresses
+    if generate_emails(company):
+        # Then generate drafts
+        if generate_company_drafts(company):
+            print(f"\nEmail generation complete for {company}")
+            print(f"You can find:")
+            print(f"1. Email data in: data/{company}/recruiters.xlsx")
+            print(f"2. Email drafts in: data/{company}/drafts/drafts.json")
+            print(f"3. Preview drafts in: data/{company}/drafts/preview.html")
+            return True
+    return False
+
+def send_mails(company):
+    """Send emails to recruiters with Gmail limits"""
+    try:
+        # Initialize email sender
+        sender = GmailSender()
+
+        # Determine file path based on company name
+        if company.lower() == 'test':
+            file_path = "data/test/recruiter.xlsx"
+        else:
+            file_path = f"data/{company}/recruiters.xlsx"
+
+        if not os.path.exists(file_path):
+            print(f"No recruiter data found at: {file_path}")
+            return False
+
+        # Read recruiter data
+        df = pd.read_excel(file_path)
+
+        # Add Email_Sent column if it doesn't exist
+        if 'Email_Sent' not in df.columns:
+            df['Email_Sent'] = False
+            df['Email_Sent_Date'] = None
+
+        # Get count of unsent emails
+        unsent_emails = len(df[~df['Email_Sent']])
+        print(f"\nPreparing to send emails for {company}")
+        print(f"Found {unsent_emails} unsent emails")
+
+        # Check daily limit
+        DAILY_LIMIT = 300  # Reduced daily limit to stay safe
+        if unsent_emails > DAILY_LIMIT:
+            print(f"Warning: You have {unsent_emails} emails to send, but daily limit is set to {DAILY_LIMIT}")
+            print("The script will stop after reaching the daily limit")
+            print("You can run the script again tomorrow to continue - it will resume where it left off")
+
+        # Initialize counters
+        emails_sent_today = 0
+        emails_sent_minute = 0
+        minute_start = time.time()
+
+        # Send emails to each recruiter
+        for idx, row in df.iterrows():
+            if pd.isna(row['Email_Sent']) or not row['Email_Sent']:
+                # Check daily limit
+                if emails_sent_today >= DAILY_LIMIT:
+                    remaining = len(df[~df['Email_Sent']]) - emails_sent_today
+                    print(f"\nReached daily limit of {DAILY_LIMIT} emails")
+                    print(f"Still have {remaining} emails remaining to send")
+                    print("Run the script again tomorrow to continue sending")
+                    break
+
+                # Check rate limit (20 emails per minute to be safe)
+                current_time = time.time()
+                if current_time - minute_start >= 60:
+                    # Reset minute counter
+                    minute_start = current_time
+                    emails_sent_minute = 0
+                elif emails_sent_minute >= 20:
+                    # Wait for the remainder of the minute
+                    wait_time = 60 - (current_time - minute_start)
+                    print(f"\nReached rate limit. Waiting {wait_time:.0f} seconds...")
+                    time.sleep(wait_time)
+                    minute_start = time.time()
+                    emails_sent_minute = 0
+
+                print(f"\nSending email to: {row['Full Name']} ({row['Email']})")
+                print(f"Emails sent today: {emails_sent_today}/{DAILY_LIMIT}")
+
+                if sender.send_email(
+                        to_email=row['Email'],
+                        recruiter_name=row['First Name'],
+                        company_name=company
+                ):
+                    df.at[idx, 'Email_Sent'] = True
+                    df.at[idx, 'Email_Sent_Date'] = pd.Timestamp.now()
+                    # Save after each successful send
+                    df.to_excel(file_path, index=False)
+                    print("Email sent successfully!")
+
+                    # Update counters
+                    emails_sent_today += 1
+                    emails_sent_minute += 1
+
+                    # Add delay between emails
+                    if idx < len(df) - 1:  # Don't delay after last email
+                        delay = 5  # 5 seconds between emails
+                        print(f"Waiting {delay} seconds before next email...")
+                        time.sleep(delay)
+                else:
+                    print("Failed to send email")
+
+        # Print summary
+        sent_count = df['Email_Sent'].sum()
+        remaining = len(df) - sent_count
+        print(f"\nEmail sending complete for {company}")
+        print(f"Successfully sent: {sent_count}/{len(df)} emails")
+        if remaining > 0:
+            print(f"Remaining emails to send: {remaining}")
+            print("Run the script again tomorrow to continue")
+        return True
+
+    except Exception as e:
+        print(f"Error in send_mails: {str(e)}")
+        return False
+
+def print_usage():
+    print("""
+    LinkedIn Recruiter Email Automation Tool
+    
+    Usage:
+        python3 autobot.py scrape <company_name>         - Scrape recruiter information from LinkedIn
+        python3 autobot.py generate_mails <company_name> - Generate email addresses and drafts
+        python3 autobot.py send_mails <company_name>     - Send emails to recruiters
+    
+    Examples:
+        # Scrape recruiters from Google:
+        python3 autobot.py scrape Google
+    
+        # Generate email drafts for Google recruiters:
+        python3 autobot.py generate_mails Google
+    
+        # Send test emails:
+        python3 autobot.py send_mails test
+    
+    Note:
+        - Use 'test' as company_name to use test data
+        - Emails are limited to 300 per day
+        - Check data/<company_name>/drafts/preview.html to review drafts
+        """)
+
+
 def main():
     if len(sys.argv) != 3:
         print_usage()
         return
 
-    command = sys.argv[1]
+    command = sys.argv[1].lower()
     company = sys.argv[2]
 
-    if command == "scrape":
-        scrape_recruiters(company)
-    elif command == "generate_mails":
-        generate_emails(company)
-    else:
+    # Validate command
+    valid_commands = {
+        "scrape": scrape_recruiters,
+        "generate_mails": generate_mails,
+        "send_mails": send_mails
+    }
+
+    if command not in valid_commands:
+        print(f"Error: Unknown command '{command}'")
         print_usage()
+        return
+
+    # Execute command
+    try:
+        print(f"\nExecuting '{command}' for company '{company}'...")
+        success = valid_commands[command](company)
+
+        if success:
+            print(f"\nSuccessfully completed '{command}' for {company}")
+        else:
+            print(f"\nFailed to complete '{command}' for {company}")
+
+    except Exception as e:
+        print(f"\nError executing {command}: {str(e)}")
+        print("Please check the usage instructions and try again")
 
 if __name__ == "__main__":
     main()

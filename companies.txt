@@ -1,4 +1,71 @@
 {
+    "Amazon": [
+
+    ],
+    "Adobe": [
+
+    ],
+    "Microsoft": [
+
+    ],
+    "Meta": [
+
+    ],
+    "Snap": [
+
+    ],
+    "Oracle": [
+        3,
+        "@oracle.com"
+    ],
+    "Tesla": [
+
+    ],
+    "Rubrik": [
+
+    ],
+    "Scale AI": [
+
+    ],
+    "Applied Intuition": [
+
+    ],
+    "Redhat": [
+
+    ],
+    "Amazon": [
+
+    ],
+    "Apple": [
+
+    ],
+    "Google": [
+
+    ],
+    "Goldman Sachs": [
+
+    ],
+    "IBM": [
+
+    ],
+    "Splunk": [
+
+    ],
+    "Service Now": [
+
+    ],
+    "Sourcegraph": [
+
+    ],
+    "Twilio": [
+
+    ],
+    "Medtronic": [
+
+    ],
+    "Qualcomm": [
+
+    ],
     "Apixio": [
         1,
         "@apixio.com"
@@ -74,10 +141,6 @@
     "Colgate-Palmolive": [
         6,
         "@colpal.com"
-    ],
-    "Lockheed Martin": [
-        3,
-        "@lmco.com"
     ],
     "Siemens": [
         3,
