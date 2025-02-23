@@ -1,245 +1,329 @@
-{
-    "Amazon": [
-
-    ],
-    "Adobe": [
-
-    ],
-    "Microsoft": [
-
-    ],
-    "Meta": [
-
-    ],
-    "Snap": [
-
-    ],
-    "Oracle": [
-        3,
-        "@oracle.com"
-    ],
-    "Tesla": [
-
-    ],
-    "Rubrik": [
-
-    ],
-    "Scale AI": [
-
-    ],
-    "Applied Intuition": [
-
-    ],
-    "Redhat": [
-
-    ],
-    "Amazon": [
-
-    ],
-    "Apple": [
-
-    ],
-    "Google": [
-
-    ],
-    "Goldman Sachs": [
-
-    ],
-    "IBM": [
-
-    ],
-    "Splunk": [
-
-    ],
-    "Service Now": [
-
-    ],
-    "Sourcegraph": [
-
-    ],
-    "Twilio": [
-
-    ],
-    "Medtronic": [
-
-    ],
-    "Qualcomm": [
-
-    ],
-    "Apixio": [
-        1,
-        "@apixio.com"
-    ],
-    "Zoox": [
-        1,
-        "@zoox.com"
-    ],
-    "Certik": [
-        3,
-        "@certik.com"
-    ],
-    "Credit karma": [
-        3,
-        "@creditkarma.com"
-    ],
-    "Four kites": [
-        3,
-        "@fourkites.com"
-    ],
-    "Volley": [
-        2,
-        "@volleythat.com"
-    ],
-    "sofi": [
-        1,
-        "@sofi.com"
-    ],
-    "Criteo": [
-        5,
-        "@criteo.com"
-    ],
-    "Arcadis": [
-        3,
-        "@arcadis.com"
-    ],
-    "Zions Bancorporation": [
-        3,
-        "@zionsbancorp.com"
-    ],
-    "Intuit": [
-        6,
-        "@intuit.com"
-    ],
-    "Oshkosh": [
-        1,
-        "@oshkoshcorp.com"
-    ],
-    "Varian Medical Systems": [
-        3,
-        "@varian.com"
-    ],
-    "Samsara": [
-        3,
-        "@samsara.com"
-    ],
-    "Wolverine": [
-        4,
-        "@wolverinetech.com"
-    ],
-    "Capital One": [
-        3,
-        "@capitalone.com"
-    ],
-    "Ziprecruiter": [
-        4,
-        "@ziprecruiter.com"
-    ],
-    "KLA": [
-        3,
-        "@kla.com"
-    ],
-    "Colgate-Palmolive": [
-        6,
-        "@colpal.com"
-    ],
-    "Siemens": [
-        3,
-        "@siemens.com"
-    ],
-    "HPE": [
-        1,
-        "@hpe.com"
-    ],
-    "Findhelp": [
-        1,
-        "@findhelp.com"
-    ],
-    "Bloomberg": [
-        1,
-        "@bloomberg.net"
-    ],
-    "Progress Residential": [
-        1,
-        "@progressresidential.com"
-    ],
-    "WellSky": [
-        3,
-        "@wellsky.com"
-    ],
-    "Pearson": [
-        3,
-        "@pearson.com"
-    ],
-    "T-mobile": [
-        3,
-        "@t-mobile.com"
-    ],
-    "Alexion": [
-        3,
-        "@alexion.com"
-    ],
-    "Atlassian": [
-        1,
-        "@atlassian.com"
-    ],
-    "Qorvo": [
-        3,
-        "@qorvo.com"
-    ],
-    "Fannie": [
-        6,
-        "@fanniemae.com"
-    ],
-    "First mode": [
-        3,
-        "@firstmode.com"
-    ],
-    "Voleon": [
-        1,
-        "@voleon.com"
-    ],
-    "Skydio": [
-        3,
-        "@skydio.com"
-    ],
-    "Fractal ai": [
-        3,
-        "@fractal.ai"
-    ],
-    "Datadog": [
-        3,
-        "@datadog.com"
-    ],
-    "Ally": [
-        3,
-        "@ally.com"
-    ],
-    "Quickbase": [
-        1,
-        "@quickbase.com"
-    ],
-    "Paypal": [
-        1,
-        "@paypal.com"
-    ],
-    "Nerdwallet": [
-        1,
-        "@nerdwallet.com"
-    ],
-    "Lacework": [
-        3,
-        "@lacework.com"
-    ],
-    "Acushnet": [
-        6,
-        "@acushnetgolf.com"
-    ],
-    "DoorDash" : [
-        3,
-        "@doordash.com"
-    ],
-    "Glean" : [
-        3,
-        "@glean.com"
-    ]
+merged_hashmap = {
+    "Cadence": [7, "@cadence.com"],
+    "Adobe": [1, "@adobe.com"],
+    "Microsoft": [],
+    "Meta": [],
+    "Snap": [],
+    "Oracle": [3, "@oracle.com"],
+    "Tesla": [1, ""],
+    "Rubrik": [],
+    "Scale AI": [],
+    "Applied Intuition": [],
+    "Redhat": [],
+    "Amazon": [1, "@amazon.com"],
+    "Apple": [],
+    "Airtable": [3, "@airtable.com"],
+    "Google": [1, ""],
+    "Goldman Sachs": [],
+    "IBM": [],
+    "Splunk": [],
+    "Service Now": [],
+    "Sourcegraph": [],
+    "Twilio": [],
+    "Medtronic": [],
+    "Qualcomm": [],
+    "Apixio": [1, "@apixio.com"],
+    "Zoox": [1, "@zoox.com"],
+    "Certik": [3, "@certik.com"],
+    "Credit karma": [3, "@creditkarma.com"],
+    "Four kites": [3, "@fourkites.com"],
+    "Volley": [2, "@volleythat.com"],
+    "SoFi": [1, "@sofi.com"],  # Keeping second list's value, removing "sofi"
+    "Criteo": [5, "@criteo.com"],
+    "Arcadis": [3, "@arcadis.com"],
+    "Zions Bancorporation": [3, "@zionsbancorp.com"],
+    "Intuit": [6, "@intuit.com"],
+    "Oshkosh": [1, "@oshkoshcorp.com"],
+    "Varian Medical Systems": [3, "@varian.com"],
+    "Samsara": [3, "@samsara.com"],
+    "Wolverine": [4, "@wolverinetech.com"],
+    "Capital One": [3, "@capitalone.com"],
+    "Ziprecruiter": [4, "@ziprecruiter.com"],
+    "KLA": [3, "@kla.com"],
+    "Colgate-Palmolive": [6, "@colpal.com"],
+    "Siemens": [3, "@siemens.com"],
+    "HPE": [1, "@hpe.com"],
+    "Findhelp": [1, "@findhelp.com"],
+    "Bloomberg": [1, "@bloomberg.net"],
+    "Progress Residential": [1, "@progressresidential.com"],
+    "WellSky": [3, "@wellsky.com"],
+    "Pearson": [3, "@pearson.com"],
+    "T-mobile": [3, "@t-mobile.com"],
+    "Alexion": [3, "@alexion.com"],
+    "Atlassian": [1, "@atlassian.com"],
+    "Qorvo": [3, "@qorvo.com"],
+    "Fannie": [6, "@fanniemae.com"],
+    "First mode": [3, "@firstmode.com"],
+    "Voleon": [1, "@voleon.com"],
+    "Skydio": [3, "@skydio.com"],
+    "Fractal ai": [3, "@fractal.ai"],
+    "Datadog": [3, "@datadog.com"],
+    "Ally": [3, "@ally.com"],
+    "Quickbase": [1, "@quickbase.com"],
+    "Paypal": [1, "@paypal.com"],  # Keeping second list's value, removing "paypal"
+    "Nerdwallet": [1, "@nerdwallet.com"],
+    "Lacework": [3, "@lacework.com"],
+    "Acushnet": [6, "@acushnetgolf.com"],
+    "DoorDash": [3, "@doordash.com"],
+    "Glean": [3, "@glean.com"],
+    'netflix': [],
+    'wayfair': [],
+    'bolt.io': [],
+    'airbnb': [],
+    'toast': [],
+    'spacex': [],
+    'mastercard': [],
+    'linkedin': [],
+    'morgan stanlee': [],
+    'jp morgan': [],
+    'bofa': [],
+    'alphabet': [],
+    'uber': [],
+    'cisco': [],
+    'ebay': [],
+    'intel': [],
+    'nvidia': [],
+    'zoom': [],
+    'ubisoft': [],
+    'robolox': [],
+    'audible': [],
+    'gsoc summer 2023': [],
+    'Workday': [],
+    'twitter': [],
+    'twitch': [],
+    'spotify': [],
+    'asana': [],
+    'quora': [],
+    'samsung': [5, ""],
+    'sony': [],
+    'buffer.io': [],
+    'gusto': [],
+    'tik tok': [],
+    'dropbox': [],
+    'visa': [],
+    'The Boring Company': [],
+    'Instabase': [],
+    'snapchat': [],
+    'dataBento': [],
+    'wipro': [],
+    'walmart': [],
+    'tcs': [],
+    'qualcom': [],
+    'Nuance Communication': [],
+    'Duck Creek': [],
+    'Akamai': [],
+    'Etsy': [],
+    'Plaid': [],
+    'PTC': [],
+    'DE Shaw': [],
+    'Benchling': [],
+    'zelle': [],
+    'Salesforce': [],
+    'yahoo': [],
+    'Riot Games': [],
+    'Segate': [],
+    'Pinterest': [],
+    'Square': [],
+    'PlayStation': [],
+    'Electronic Arts': [],
+    'Nintendo': [],
+    'Panasonic': [],
+    'Factset': [],
+    'citadel': [],
+    'torani': [],
+    'cyan markets': [],
+    'niantic': [],
+    'genetech': [],
+    'MealMe': [],
+    'NetApp': [],
+    'Nimble': [],
+    'Juniper Networks': [],
+    'ZS': [],
+    'simplify': [],
+    'tuSimple': [],
+    'Slack': [],
+    'fan Duel': [],
+    'JLL': [],
+    'businessolver': [],
+    'Jhonson controls': [],
+    'Nasuni': [],
+    'Rockwell AutoMation': [],
+    'GitLab': [],
+    'Momentum': [],
+    'bread financial': [],
+    'pega Systems': [],
+    'RTI Systems': [],
+    'Boston Dynamics': [],
+    'reddit': [],
+    'excelitas technologies': [],
+    'flatiron': [],
+    'cohere.ai': [],
+    'cohesity': [],
+    'lucid software': [],
+    'iRobot': [],
+    'Slalom Build': [],
+    'workiva': [],
+    'schneider': [],
+    'Barclays': [],
+    'WhatNot': [],
+    'patreon': [],
+    'State Street': [],
+    'Bandwidth': [],
+    'UKG': [],
+    'BMW Group': [],
+    'Ampere': [],
+    'Fanatics': [],
+    'BAE Sytems': [],
+    'Dr. pepper': [],
+    'infineon': [],
+    'Dawn': [],
+    'affinitive': [],
+    'addepar': [],
+    'WayUp': [],
+    'Paylocity': [],
+    'Relativity': [],
+    'Alteryx': [],
+    'Adaptive Biotechnologies': [],
+    'neuralink': [],
+    'Intuitive': [],
+    'AutoDesk': [],
+    'IheartMedia': [],
+    'IXL': [],
+    'HP': [],
+    'UI PAth': [],
+    'CloudFare': [],
+    'Silicon Labs': [],
+    'ADP': [],
+    'Expedia group': [],
+    'Garmin': [],
+    'Rivian': [],
+    'SingleStore': [],
+    'Delta': [],
+    'Bose': [],
+    'Visat': [],
+    'Rocket Lawyer': [],
+    'Brightly': [],
+    'Iron Mountain': [],
+    'Ellucian': [],
+    'Asics Digital': [],
+    'Lattice': [],
+    'Werfern': [],
+    'Mercury Labs': [],
+    'Genetech': [],
+    'Sensata': [],
+    'Staples': [],
+    'Hewlett Packard Enterprice': [],
+    'Crestron Electronics': [],
+    'Cox': [],
+    'zetaGlobal': [],
+    'Wisk Aero': [],
+    'Uline': [],
+    'GuideWire': [],
+    'Carbon': [],
+    'Prometheus Group': [],
+    'Acuity Brands': [],
+    'Kwik': [],
+    'Keysight': [],
+    'Rippling': [],
+    'Azenta': [],
+    'Wave Life Sciences': [],
+    'brivo': [],
+    'Kion Group': [],
+    'Veeva': [],
+    'Alarm.com': [],
+    'MasterControl': [],
+    'Outrider': [],
+    'Alert Innovation': [],
+    'Johnson Controls': [],
+    'Medline': [],
+    'US Express': [],
+    'S&P Global': [],
+    'Trimble Maps': [],
+    'Bright tree(Resmed)': [],
+    'Whoop': [],
+    'Insight Global': [],
+    'Cohere Health': [],
+    'Twelve': [],
+    'Valeo': [],
+    'Athena Health': [],
+    'Arine': [],
+    'F5': [],
+    'Vial': [],
+    'Entertainment Partners': [],
+    'Verisk': [],
+    'ModMed': [],
+    'IDEMIA': [],
+    'Agilysys': [],
+    'STMicroelectronics': [],
+    'WD': [],
+    'Schonfled': [],
+    'Spring Health': [],
+    'Janus Henderson': [],
+    'NetBrain': [],
+    'BJC HealthCare': [],
+    'Whisker': [],
+    'Atom Finance': [],
+    'Dassault Systemes': [3, ""],
+    'CTF Guide': [],
+    'RXO': [],
+    'Disney': [],
+    'PACCAR': [],
+    'Bechtel': [],
+    'weaveGrid': [],
+    '6 sense': [],
+    'ASML': [],
+    'Gainwell': [],
+    'Joby Aviation': [],
+    'Manga': [],
+    'Jabil': [],
+    'Parallel Systems': [],
+    'Waters': [],
+    'LuLu Lemon': [],
+    'Copart': [],
+    'Accolade': [],
+    'MathWorks': [],
+    'Micron': [],
+    'Verily': [],
+    'ForcePoint': [],
+    'KARL STORZ Imaging': [],
+    'Epsilon': [],
+    'Agilent': [],
+    'SoundCloud': [],
+    'OpenEye, Cadence Molecular Sciences': [],
+    'Summa': [],
+    'Turion Space': [],
+    'Casa Systems': [],
+    'Hologic': [],
+    'Rapid7': [],
+    'Liberty Mutual': [],
+    'Berkley Alternative Markets tech': [],
+    'tektronix': [],
+    'UnAccountable': [],
+    'Taulia': [],
+    'Basis tech': [],
+    'Synopsis': [],
+    'Nautilus Hyosung America, Inc': [],
+    'Moog Human Resources': [],
+    'ExtremeReach': [],
+    'Cotivity': [],
+    'EBSCO': [],
+    'UL Solutions': [],
+    'SummerSalt': [],
+    'ark biotech': [],
+    'SAIC': [],
+    'yes Energy': [],
+    'GE': [],
+    'Itron': [],
+    'Interner Brands': [],
+    'Firemon': [],
+    'Nokia': [],
+    'EVIL GENIUSES': [],
+    'Motorolla': [],
+    'Vallidity': [],
+    'Blackberry': [],
+    'Fidelity': [3, ""],
+    'Ansys': [3, ""],
+    'Vantage': [4, ""],
+    'snowflake': [3, ""],
+    'ACI WorldWide': []
 }

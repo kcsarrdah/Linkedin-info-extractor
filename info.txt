@@ -1,14 +1,11 @@
-Add randomized delays and human-like behavior:
+stuff to add :
 
-Add random mouse movements and scrolling:
+Browser automation improvements
+use the wait_for_load_state() instead of delays in the linkedin automation.
+Extracting profile URLs from HTML if possible
+add template customization service.
 
-Implement session management and rotation:
-
-Add stealth mode configurations:
-
-Implement request throttling:
-
-Additional recommendations:
+Additional recommendations for email sender service:
 
 Rotate IP addresses (using proxies)
 Implement exponential backoff for retries
@@ -17,9 +14,3 @@ Use different user agents
 Consider running during different times of day
 Implement rate limiting
 Handle CAPTCHAs if they appear
-
-Would you like me to elaborate on any of these aspects or show how to implement them in more detail?
-
-stuff to add :
-verify emails (options : True Mail(open soure Link : https://truemail-rb.org/#/about
-) or Captain verify(pretty cheap))

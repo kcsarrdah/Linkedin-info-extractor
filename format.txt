@@ -13,4 +13,6 @@
     if type == 5:
         fake_email = f"{first_initial}.{last}{mailFormat}" #change        
     if type == 6:
-       fake_email = f"{first}_{last}{mailFormat}"     
+       fake_email = f"{first}_{last}{mailFormat}"
+    if type == 7:
+        fake_email = f"{first}{last_initial}{mailFormat}"

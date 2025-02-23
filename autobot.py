@@ -1,7 +1,7 @@
 from src.linkedinAutomation import login, search, filter_recruiters, goto_next_page
 from src.html_parser import HTMLProcessor
 from src.pdf_parser import PDFProcessor
-from src.excelhandler import save_recruiter_data, generate_emails
+from src.excelhandler import save_recruiter_data, get_mails_from_apollo
 from src.emailDraftManager import generate_company_drafts
 from src.emailSender import GmailSender
 import pandas as pd
@@ -96,8 +96,8 @@ def scrape_recruiters(company):
     print(f"Starting scraping for {company}...")
 
     roles = [
-        {"role": "technical recruiter", "search_text": f"{company} technical recruiter"},
-        {"role": "university recruiter", "search_text": f"{company} university recruiter"}
+        {"role": "technical recruiter", "search_text": f"{company} AND technical recruiter"},
+        {"role": "university recruiter", "search_text": f"{company} AND university recruiter"}
     ]
 
     with sync_playwright() as p:
@@ -164,26 +164,57 @@ def scrape_recruiters(company):
             print("Note: Temp directory not empty or already removed")
 
 
-def print_usage():
-    print("""
-Usage:
-    python3 main.py scrape <company_name>     - Scrape recruiter names for the specified company
-    python3 main.py generate_mails <company_name>  - Generate emails for previously scraped recruiters
-    """)
-
 def generate_mails(company):
-    """Generate emails and drafts for company"""
-    # First generate email addresses
-    if generate_emails(company):
-        # Then generate drafts
-        if generate_company_drafts(company):
-            print(f"\nEmail generation complete for {company}")
-            print(f"You can find:")
-            print(f"1. Email data in: data/{company}/recruiters.xlsx")
-            print(f"2. Email drafts in: data/{company}/drafts/drafts.json")
-            print(f"3. Preview drafts in: data/{company}/drafts/preview.html")
-            return True
-    return False
+    """Generate emails for company using Apollo API"""
+    print(f"\nStarting email address generation for {company}...")
+
+    # Generate email addresses with Apollo API
+    if not get_mails_from_apollo(company):
+        print("Failed to generate email addresses")
+        return False
+
+    # Read the data to show summary
+    try:
+        df = pd.read_excel(f"data/{company}/recruiters.xlsx")
+        apollo_count = len(df[df['Email Source'] == 'apollo'])
+        fallback_count = len(df[df['Email Source'] == 'fallback'])
+        verified_count = len(df[df['Email Status'] == 'verified'])
+
+        print("\nEmail Generation Summary:")
+        print(f"Total recruiters: {len(df)}")
+        print(f"Apollo emails: {apollo_count}")
+        print(f"Fallback emails: {fallback_count}")
+        print(f"Verified emails: {verified_count}")
+
+    except Exception as e:
+        print(f"Error reading summary data: {e}")
+
+    print(f"\nEmail generation complete for {company}")
+    print(f"Email data saved in: data/{company}/recruiters.xlsx")
+    return True
+
+
+def generate_drafts(company):
+    """Generate email drafts for company"""
+    print(f"\nStarting draft generation for {company}...")
+
+    # Check if we have the email data
+    if not os.path.exists(f"data/{company}/recruiters.xlsx"):
+        print(f"Error: No email data found for {company}")
+        print("Please run 'generate_mails' command first")
+        return False
+
+    # Generate drafts
+    if not generate_company_drafts(company):
+        print("Failed to generate drafts")
+        return False
+
+    print(f"\nDraft generation complete for {company}")
+    print(f"You can find:")
+    print(f"1. Email drafts in: data/{company}/drafts/drafts.json")
+    print(f"2. Preview drafts in: data/{company}/drafts/preview.html")
+    return True
+
 
 def send_mails(company):
     """Send emails to recruiters with Gmail limits"""
@@ -204,47 +235,52 @@ def send_mails(company):
         # Read recruiter data
         df = pd.read_excel(file_path)
 
+        # Filter to only send to verified emails from Apollo
+        verified_mask = (df['Email Status'] == 'verified') & (df['Email Source'] == 'apollo')
+        verified_df = df[verified_mask].copy()
+
+        print(f"\nFound {len(verified_df)} verified emails from Apollo")
+        print(f"Skipping {len(df) - len(verified_df)} unverified or fallback emails")
+
         # Add Email_Sent column if it doesn't exist
-        if 'Email_Sent' not in df.columns:
-            df['Email_Sent'] = False
-            df['Email_Sent_Date'] = None
+        if 'Email_Sent' not in verified_df.columns:
+            verified_df['Email_Sent'] = False
+            verified_df['Email_Sent_Date'] = None
 
         # Get count of unsent emails
-        unsent_emails = len(df[~df['Email_Sent']])
+        unsent_emails = len(verified_df[~verified_df['Email_Sent']])
         print(f"\nPreparing to send emails for {company}")
-        print(f"Found {unsent_emails} unsent emails")
+        print(f"Found {unsent_emails} unsent verified emails")
 
         # Check daily limit
         DAILY_LIMIT = 300  # Reduced daily limit to stay safe
         if unsent_emails > DAILY_LIMIT:
-            print(f"Warning: You have {unsent_emails} emails to send, but daily limit is set to {DAILY_LIMIT}")
+            print(f"Warning: You have {unsent_emails} emails to send, but daily limit is {DAILY_LIMIT}")
             print("The script will stop after reaching the daily limit")
-            print("You can run the script again tomorrow to continue - it will resume where it left off")
+            print("You can run the script again tomorrow to continue")
 
         # Initialize counters
         emails_sent_today = 0
         emails_sent_minute = 0
         minute_start = time.time()
 
-        # Send emails to each recruiter
-        for idx, row in df.iterrows():
+        # Send emails to each verified recruiter
+        for idx, row in verified_df.iterrows():
             if pd.isna(row['Email_Sent']) or not row['Email_Sent']:
                 # Check daily limit
                 if emails_sent_today >= DAILY_LIMIT:
-                    remaining = len(df[~df['Email_Sent']]) - emails_sent_today
+                    remaining = len(verified_df[~verified_df['Email_Sent']]) - emails_sent_today
                     print(f"\nReached daily limit of {DAILY_LIMIT} emails")
-                    print(f"Still have {remaining} emails remaining to send")
+                    print(f"Still have {remaining} verified emails remaining")
                     print("Run the script again tomorrow to continue sending")
                     break
 
-                # Check rate limit (20 emails per minute to be safe)
+                # Rate limiting logic remains the same
                 current_time = time.time()
                 if current_time - minute_start >= 60:
-                    # Reset minute counter
                     minute_start = current_time
                     emails_sent_minute = 0
                 elif emails_sent_minute >= 20:
-                    # Wait for the remainder of the minute
                     wait_time = 60 - (current_time - minute_start)
                     print(f"\nReached rate limit. Waiting {wait_time:.0f} seconds...")
                     time.sleep(wait_time)
@@ -252,6 +288,7 @@ def send_mails(company):
                     emails_sent_minute = 0
 
                 print(f"\nSending email to: {row['Full Name']} ({row['Email']})")
+                print(f"Email Status: {row['Email Status']}")
                 print(f"Emails sent today: {emails_sent_today}/{DAILY_LIMIT}")
 
                 if sender.send_email(
@@ -259,31 +296,33 @@ def send_mails(company):
                         recruiter_name=row['First Name'],
                         company_name=company
                 ):
+                    # Update both DataFrames
+                    verified_df.at[idx, 'Email_Sent'] = True
+                    verified_df.at[idx, 'Email_Sent_Date'] = pd.Timestamp.now()
                     df.at[idx, 'Email_Sent'] = True
                     df.at[idx, 'Email_Sent_Date'] = pd.Timestamp.now()
+
                     # Save after each successful send
                     df.to_excel(file_path, index=False)
                     print("Email sent successfully!")
 
-                    # Update counters
                     emails_sent_today += 1
                     emails_sent_minute += 1
 
-                    # Add delay between emails
-                    if idx < len(df) - 1:  # Don't delay after last email
-                        delay = 5  # 5 seconds between emails
+                    if idx < len(verified_df) - 1:
+                        delay = 5
                         print(f"Waiting {delay} seconds before next email...")
                         time.sleep(delay)
                 else:
                     print("Failed to send email")
 
         # Print summary
-        sent_count = df['Email_Sent'].sum()
-        remaining = len(df) - sent_count
+        sent_count = verified_df['Email_Sent'].sum()
+        remaining = len(verified_df) - sent_count
         print(f"\nEmail sending complete for {company}")
-        print(f"Successfully sent: {sent_count}/{len(df)} emails")
+        print(f"Successfully sent: {sent_count}/{len(verified_df)} verified emails")
         if remaining > 0:
-            print(f"Remaining emails to send: {remaining}")
+            print(f"Remaining verified emails to send: {remaining}")
             print("Run the script again tomorrow to continue")
         return True
 
@@ -291,28 +330,31 @@ def send_mails(company):
         print(f"Error in send_mails: {str(e)}")
         return False
 
+
 def print_usage():
     print("""
     LinkedIn Recruiter Email Automation Tool
-    
+
     Usage:
         python3 autobot.py scrape <company_name>         - Scrape recruiter information from LinkedIn
-        python3 autobot.py generate_mails <company_name> - Generate email addresses and drafts
-        python3 autobot.py send_mails <company_name>     - Send emails to recruiters
-    
+        python3 autobot.py generate_mails <company_name> - Generate email addresses using Apollo API
+        python3 autobot.py generate_drafts <company_name> - Generate email drafts
+        python3 autobot.py send_mails <company_name>     - Send emails to recruiters (verified Apollo emails only)
+
     Examples:
         # Scrape recruiters from Google:
         python3 autobot.py scrape Google
-    
+
         # Generate email drafts for Google recruiters:
         python3 autobot.py generate_mails Google
-    
+
         # Send test emails:
         python3 autobot.py send_mails test
-    
+
     Note:
         - Use 'test' as company_name to use test data
-        - Emails are limited to 300 per day
+        - Only verified emails from Apollo API will be sent
+        - Emails are limited to 300 sends per day
         - Check data/<company_name>/drafts/preview.html to review drafts
         """)
 
@@ -325,10 +367,10 @@ def main():
     command = sys.argv[1].lower()
     company = sys.argv[2]
 
-    # Validate command
     valid_commands = {
         "scrape": scrape_recruiters,
         "generate_mails": generate_mails,
+        "generate_drafts": generate_drafts,
         "send_mails": send_mails
     }
 
@@ -337,7 +379,6 @@ def main():
         print_usage()
         return
 
-    # Execute command
     try:
         print(f"\nExecuting '{command}' for company '{company}'...")
         success = valid_commands[command](company)
@@ -350,6 +391,7 @@ def main():
     except Exception as e:
         print(f"\nError executing {command}: {str(e)}")
         print("Please check the usage instructions and try again")
+
 
 if __name__ == "__main__":
     main()
