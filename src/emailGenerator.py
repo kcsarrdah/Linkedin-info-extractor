@@ -1,4 +1,3 @@
-
 import json
 import re
 import requests
@@ -6,7 +5,6 @@ from pathlib import Path
 from typing import Optional, Dict, Tuple
 import time
 from datetime import datetime, timedelta
-
 
 class RateLimitManager:
     def __init__(self):
@@ -44,21 +42,28 @@ class RateLimitManager:
         """Check if we can make a request, return (can_request, wait_time)"""
         current_time = datetime.now()
 
+        print(f"DEBUG: Current usage - Daily: {self.daily_usage}/{self.daily_limit}, "
+              f"Hourly: {self.hourly_usage}/{self.hourly_limit}, "
+              f"Minute: {self.minute_usage}/{self.minute_limit}")
+
         # Check daily limit
         if self.daily_usage >= self.daily_limit:
-            print("Daily limit reached. Stopping operations.")
+            print("DEBUG: Daily limit reached. Stopping operations.")
             return False, None
 
         # Check hourly limit
         if self.hourly_usage >= self.hourly_limit:
             wait_time = 3600 - (current_time - self.last_reset_hour).seconds
+            print(f"DEBUG: Hourly limit reached. Wait time: {wait_time} seconds")
             return False, wait_time
 
         # Check minute limit
         if self.minute_usage >= self.minute_limit:
             wait_time = 60 - (current_time - self.last_reset_minute).seconds
+            print(f"DEBUG: Minute limit reached. Wait time: {wait_time} seconds")
             return False, wait_time
 
+        print("DEBUG: Rate limits OK, can make request")
         return True, 0
 
 
@@ -103,53 +108,96 @@ class EmailGenerator:
         return name.lower()
 
     def get_person_data(self, first_name: str, last_name: str, company: str, domain: str) -> Dict:
-        """Get person data from Apollo API with rate limit handling"""
-        can_request, wait_time = self.rate_limit_manager.can_make_request()
+        """Get person data from Apollo API with improved rate limit handling and retry logic"""
+        max_retries = 3
+        retry_count = 0
 
-        if not can_request:
-            if wait_time is None:
-                print("Daily limit reached. Cannot process more requests today.")
-                return {"error": "daily_limit_reached"}
-            print(f"Rate limit reached. Waiting {wait_time} seconds...")
-            time.sleep(wait_time)
+        while retry_count <= max_retries:
+            # Check if we can make a request
+            can_request, wait_time = self.rate_limit_manager.can_make_request()
 
-        headers = {
-            "accept": "application/json",
-            "Cache-Control": "no-cache",
-            "Content-Type": "application/json",
-            "x-api-key": self.api_key
-        }
+            if not can_request:
+                if wait_time is None:
+                    print("Daily limit reached. Cannot process more requests today.")
+                    return {"error": "daily_limit_reached"}
 
-        params = {
-            "first_name": first_name,
-            "last_name": last_name,
-            "organization_name": company,
-            "domain": domain,
-            "reveal_personal_emails": True,
-            "reveal_phone_number": False
-        }
+                print(f"Rate limit reached. Waiting {wait_time} seconds before retry...")
+                time.sleep(wait_time)
+                print("Wait completed. Trying again...")  # Add this line
+                # Continue to next loop iteration to check limits again after waiting
+                continue
 
-        try:
-            response = requests.post(self.api_url, headers=headers, json=params)
-            self.rate_limit_manager.update_limits(response.headers)
+            # We can make a request, prepare and send it
+            headers = {
+                "accept": "application/json",
+                "Cache-Control": "no-cache",
+                "Content-Type": "application/json",
+                "x-api-key": self.api_key
+            }
 
-            if response.status_code == 200:
-                data = response.json()
-                person = data.get('person', {})
-                return {
-                    "email": person.get('email'),
-                    "email_status": person.get('email_status'),
-                    "title": person.get('title'),
-                    "headline": person.get('headline'),
-                    "linkedin_url": person.get('linkedin_url'),
-                    "source": "apollo"
-                }
+            params = {
+                "first_name": first_name,
+                "last_name": last_name,
+                "organization_name": company,
+                "domain": domain,
+                "reveal_personal_emails": True,
+                "reveal_phone_number": False
+            }
 
-            return {"error": f"api_error_{response.status_code}"}
+            try:
+                response = requests.post(self.api_url, headers=headers, json=params)
+                self.rate_limit_manager.update_limits(response.headers)
 
-        except Exception as e:
-            print(f"API error: {str(e)}")
-            return {"error": "api_error"}
+                # Check for rate limit response from API (HTTP 429)
+                if response.status_code == 429:
+                    retry_count += 1
+
+                    # Get retry-after header if available, otherwise use default wait time
+                    retry_after = int(response.headers.get('retry-after', 60))
+                    print(
+                        f"API rate limit hit (429). Waiting {retry_after} seconds before retry {retry_count}/{max_retries}...")
+
+                    time.sleep(retry_after)
+                    continue
+
+                # Successful API call
+                if response.status_code == 200:
+                    data = response.json()
+                    person = data.get('person', {})
+                    return {
+                        "email": person.get('email'),
+                        "email_status": person.get('email_status'),
+                        "title": person.get('title'),
+                        "headline": person.get('headline'),
+                        "linkedin_url": person.get('linkedin_url'),
+                        "source": "apollo"
+                    }
+
+                # If we get here, it's a different API error
+                error_msg = f"api_error_{response.status_code}"
+                print(f"API returned error: {error_msg}")
+
+                # For other errors, increment retry counter and try again
+                retry_count += 1
+                if retry_count <= max_retries:
+                    print(f"Will retry request ({retry_count}/{max_retries}) after 5 seconds...")
+                    time.sleep(5)
+                    continue
+                else:
+                    return {"error": error_msg}
+
+            except Exception as e:
+                print(f"API error: {str(e)}")
+                retry_count += 1
+                if retry_count <= max_retries:
+                    print(f"Retrying request ({retry_count}/{max_retries}) after 5 seconds...")
+                    time.sleep(5)  # Wait 5 seconds before retry on connection errors
+                    continue
+                else:
+                    return {"error": "api_error_max_retries"}
+
+        # If we've exhausted all retries (shouldn't get here normally)
+        return {"error": "api_error_max_retries"}
 
     def generate_fallback_email(self, first_name: str, last_name: str, company: str) -> str:
         """Generate email using traditional format"""
